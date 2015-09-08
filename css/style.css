@@ -4,3 +4,10 @@
 .ui-item .panel-title a {
   margin-left: 5px;
 }
+.ui-todo-item .tasks label .todo-item-label {
+  margin-left: .5em;
+}
+.ui-todo-item .tasks label.done .todo-item-label {
+  color: #777;
+  text-decoration: line-through;
+}

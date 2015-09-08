@@ -1,0 +1,8 @@
+<div class="row">
+  <div ng-repeat="item in items track by item.id" class="col-md-4">
+    <div ui-keep-item item="item" type="text" ng-if="item.type === 'text'"></div>
+    <div ui-keep-item item="item" type="todo" ng-if="item.type === 'todo'"></div>
+  </div>
+</div>
+
+<div ng-include="'/keep/views/editModal.html'"></div>

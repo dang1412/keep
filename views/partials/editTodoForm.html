@@ -1,0 +1,16 @@
+<div class="form-group">
+  <input type="text" class="form-control" placeholder="Title" ng-model="editItem.title">
+</div>
+<ul class="list-group">
+  <li class="list-group-item" ng-repeat="task in editItem.tasks">
+    <div class="input-group">
+      <span class="input-group-addon">
+        <input type="checkbox" aria-label="..." ng-model="task.done">
+      </span>
+      <input type="text" class="form-control" placeholder="Task" ng-model="task.label">
+      <span class="input-group-addon">
+        <a href="" ng-click="removeTask(editItem, $index);"><i class="fa fa-close"></i></a>
+      </span>
+    </div><!-- /input-group -->
+  </li>
+</ul>

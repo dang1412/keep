@@ -1,0 +1,27 @@
+<div class="panel panel-primary ui-todo-item ui-item">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      <span>{{item.title}}</span>
+      <a href="" class="pull-right" ng-click="removeItem(item)"><i class="fa fa-trash"></i></a>
+      <a href="" ng-click="editItem(item)" class="pull-right"><i class="fa fa-edit"></i></a>
+    </h3>
+  </div>
+  <div class="panel-body">
+    <div class="progress" label="%(percent)s%" min="0" max="100">
+      <div class="progress-bar" role="progressbar" style="width: {{ percentNumber = percent(item.tasks) }}%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+        <span min="0" max="100">
+          <span>{{percentNumber}}</span>
+          <span>%</span>
+        </span>
+      </div>
+    </div>
+    <ul class="list-group">
+      <li class="list-group-item" ng-repeat="task in item.tasks" >
+        <label class="">
+          <input type="checkbox" ng-model="task.done">
+          <span class="todo-item-label">{{task.label}}</span>
+        </label>
+      </li>
+    </ul>
+  </div>
+</div>

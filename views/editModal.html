@@ -1,0 +1,18 @@
+<div class="modal fade" id="editModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Edit Item</h4>
+      </div>
+      <div class="modal-body">
+        <div ng-if="editItem.type === 'text'" ng-include="'/keep/views/partials/editTextForm.html'"></div>
+        <div ng-if="editItem.type === 'todo'" ng-include="'/keep/views/partials/editTodoForm.html'"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" ng-click="addTask(editItem)" ng-if="editItem.type === 'todo'">Add Task</button>
+        <button type="button" class="btn btn-primary" ng-click="saveItem(editItem)">Save</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

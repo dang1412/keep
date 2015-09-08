@@ -15,9 +15,9 @@
         </span>
       </div>
     </div>
-    <ul class="list-group">
+    <ul class="list-group tasks">
       <li class="list-group-item" ng-repeat="task in item.tasks" >
-        <label class="">
+        <label ng-class="{'done': task.done}">
           <input type="checkbox" ng-model="task.done">
           <span class="todo-item-label">{{task.label}}</span>
         </label>

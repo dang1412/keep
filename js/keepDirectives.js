@@ -1,5 +1,6 @@
 // Directives
-keepApp.directive('uiKeepItem', ['keepService', uiKeepItem]);
+keepApp.directive('uiKeepItem', ['keepService', uiKeepItem])
+  .directive('uiBindMarkdown', ['$timeout', uiBindMarkdown]);
 
 function uiKeepItem (keepService) {
   return {
@@ -36,17 +37,41 @@ function uiKeepItem (keepService) {
 }
 
 
-function uiKeepEdit () {
+// function uiKeepEdit () {
+//   return {
+//     restrict: 'EA',
+//     require: '?ngModel',
+//     templateUrl: '/keep/views/uiKeepTodo.html',
+//     compile: function compile() {
+//       return postLink;
+//     }
+//   };
+//
+//   function postLink () {
+//
+//   }
+// }
+
+function uiBindMarkdown($timeout){
   return {
     restrict: 'EA',
-    require: '?ngModel',
-    templateUrl: '/keep/views/uiKeepTodo.html',
+    scope: {
+      mdSource: '='
+    },
     compile: function compile() {
-      return postLink;
+      //return postLink;
+      return function (scope, iElement, iAttrs) {
+          $timeout(function(){
+              postLink(scope, iElement, iAttrs);
+          }, 100);
+      };
     }
   };
 
-  function postLink () {
-
+  function postLink (scope, iElement, iAttrs) {
+    console.log(scope.mdSource);
+    scope.$watch('mdSource', function () {
+      iElement.html( window.marked(scope.mdSource) );
+    });
   }
 }

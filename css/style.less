@@ -3,11 +3,21 @@
 }
 
 .ui-item {
-  .panel-title {
-    a {
-      margin-left: 5px;
+  &.started {
+    border: 1px dashed #337ab7;
+  }
+  &.targetted {
+    border: 1px dashed #333;
+  }
+  .panel-heading {
+    cursor: move;
+    .panel-title {
+      a {
+        margin-left: 5px;
+      }
     }
   }
+
 }
 
 .ui-todo-item {

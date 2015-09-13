@@ -1,7 +1,16 @@
 .container {
   padding-top: 20px;
 }
-.ui-item .panel-title a {
+.ui-item.started {
+  border: 1px dashed #337ab7;
+}
+.ui-item.targetted {
+  border: 1px dashed #333;
+}
+.ui-item .panel-heading {
+  cursor: move;
+}
+.ui-item .panel-heading .panel-title a {
   margin-left: 5px;
 }
 .ui-todo-item .tasks label .todo-item-label {

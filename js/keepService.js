@@ -14,7 +14,20 @@ keepApp.factory('keepService', ['$http', keepService]);
 function keepService ($http) {
   //var data;
   var scope = null;
-  var store = new KeepStore();
+  var store = new KeepStore(),
+      undoStack = new UndoStack();
+
+  // Implemnt UndoStack's 2 functions
+  undoStack.getStateSnapshot = function () {
+    return {items: scope ? scope.items.slice(0) : null};
+  }
+
+  undoStack.setStateSnapshot = function (snapshotState) {
+    if (!scope) return;
+    scope.items = snapshotState.items;
+    store.save(scope.items);
+  }
+
   return {
     setScope: setScope,
     getInitData: getInitData,
@@ -23,7 +36,10 @@ function keepService ($http) {
     newTextItem: newTextItem,
     newTodoItem: newTodoItem,
     saveItem: saveItem,
-    removeItem: removeItem
+    removeItem: removeItem,
+    undo: undo,
+    redo: redo,
+    switchItems: switchItems  // Sortable
   }
 
   function setScope ($scope) {
@@ -33,6 +49,7 @@ function keepService ($http) {
   function getInitData () {
     if (!scope) return;
     $http.get('/keep/data/initial.json').success(function (data) {
+      undoStack.snapshot();
       scope.items = data;
     });
   }
@@ -74,6 +91,7 @@ function keepService ($http) {
     var index_pos = _.findIndex(scope.items, function(_item) {
       return _item.id == item.id;
     });
+    undoStack.snapshot(); // snapshot before change
     if (index_pos >= 0) { // update
       scope.items[ index_pos ] = item;
     }
@@ -82,7 +100,7 @@ function keepService ($http) {
       scope.items.push(item);
     }
 
-    // TODO save state, save storage
+    // save storage
     store.save(scope.items);
 
     $('#editModal').modal('hide');
@@ -94,18 +112,46 @@ function keepService ($http) {
       return _item.id == item.id;
     });
     if (index_pos >= 0) { // remove
+      undoStack.snapshot();
       scope.items.splice(index_pos, 1);
       store.save(scope.items);
     }
   }
 
-  function undo () {// TODO
+  function undo () {//
+    undoStack.undo();
   }
 
-  function redo () {// TODO
+  function redo () {//
+    undoStack.redo();
+  }
+
+  function switchItems (startedId, targettedId) {
+    if (!scope || !scope.items || startedId == null || targettedId == null) return;
+    if (startedId === targettedId) return;
+    var items = scope.items;
+    var s_ind = _.findIndex(items, function (item) {
+      return item.id == startedId;
+    });
+    var t_ind = _.findIndex(items, function (item) {
+      return item.id == targettedId;
+    });
+
+    if (s_ind < 0 || t_ind < 0) return;
+
+    var step = s_ind < t_ind ? 1 : -1;
+    var startItem = items[s_ind];
+    undoStack.snapshot();
+    for (var i = s_ind; i != t_ind; i = i + step) {
+      items[i] = items[i + step];
+    }
+    items[i] = startItem;
+    store.save(items);
+    scope.$apply();
   }
 }
 
+// KeepStore definition
 function KeepStore(options) {
   options = options || {};
   this._store = options.store || localStorage;
@@ -132,5 +178,60 @@ KeepStore.prototype = {
     } catch (e) {
       console.error("failed saving keep data", e);
     }
+  }
+};
+
+// UndoStack
+var UndoStack = function() {
+  this.state = {undo: [], redo: []};
+}
+
+UndoStack.prototype = {
+  setState: function(state) {
+    this.state = state;
+  },
+
+  snapshot: function() {
+    var undo = this.state.undo.concat(this.getStateSnapshot());
+    this.setState({undo: undo, redo: []});
+  },
+
+  hasUndo: function() {
+    return this.state.undo.length > 0;
+  },
+
+  hasRedo: function() {
+    return this.state.redo.length > 0;
+  },
+
+  redo: function() {
+    this._undoImpl(true);
+  },
+
+  undo: function() {
+    this._undoImpl();
+  },
+
+  _undoImpl: function(isRedo) {
+    var undo = this.state.undo.slice(0);
+    var redo = this.state.redo.slice(0);
+    var snapshot;
+
+    if (isRedo) {
+      if (redo.length === 0) {
+        return;
+      }
+      snapshot = redo.pop();
+      undo.push(this.getStateSnapshot());
+    } else {
+      if (undo.length === 0) {
+        return;
+      }
+      snapshot = undo.pop();
+      redo.push(this.getStateSnapshot());
+    }
+
+    this.setStateSnapshot(snapshot);
+    this.setState({undo:undo, redo:redo});
   }
 };

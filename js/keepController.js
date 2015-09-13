@@ -45,4 +45,6 @@ function headerController ($scope, keepService) {
   $scope.newTextItem = keepService.newTextItem;
   $scope.newTodoItem = keepService.newTodoItem;
   $scope.getInitData = keepService.getInitData;
+  $scope.undo = keepService.undo;
+  $scope.redo = keepService.redo;
 }

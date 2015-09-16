@@ -19,7 +19,8 @@ function keepService ($http) {
 
   // Implemnt UndoStack's 2 functions
   undoStack.getStateSnapshot = function () {
-    return {items: scope ? scope.items.slice(0) : null};
+    if (!scope) return;
+    return {items: scope.items ? scope.items.slice(0) : null};
   }
 
   undoStack.setStateSnapshot = function (snapshotState) {
@@ -39,7 +40,8 @@ function keepService ($http) {
     removeItem: removeItem,
     undo: undo,
     redo: redo,
-    switchItems: switchItems  // Sortable
+    switchItems: switchItems,  // Sortable,
+    resizeItem: resizeItem
   }
 
   function setScope ($scope) {
@@ -147,6 +149,26 @@ function keepService ($http) {
     }
     items[i] = startItem;
     store.save(items);
+    scope.$apply();
+  }
+
+  function resizeItem (itemId, widthUnitChange, heightChange) {
+    if (!scope || !scope.items) return;
+
+    if (!widthUnitChange && !heightChange ) return;
+    var item_ind = _.findIndex(scope.items, function (item) {
+      return item.id == itemId;
+    });
+
+    var newItem = utils.clone(scope.items[item_ind]);
+    if (widthUnitChange) {
+      undoStack.snapshot();
+      newItem.widthUnitNumber += widthUnitChange;
+      if (newItem.widthUnitNumber < 1) newItem.widthUnitNumber = 1;
+      if (newItem.widthUnitNumber > 12) newItem.widthUnitNumber = 12;
+      scope.items[item_ind] = newItem;
+      store.save(scope.items);
+    }
     scope.$apply();
   }
 }

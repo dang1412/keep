@@ -27,44 +27,25 @@ function uiKeepItem (keepService, $document) {
     $scope.percent = percent;
     $scope.editItem = editItem;
     $scope.removeItem = keepService.removeItem;
-    element.on('$destroy', function() {
-      console.log('item destroy');
-    });
+
+    $scope.item.widthUnitNumber = $scope.item.widthUnitNumber || 4;
 
     // Sortable
-    element.on('mousedown', '.panel-heading', function (event) {
-      event.preventDefault();
-      //console.log(event.target.tagName);
-      if (event.target.tagName === 'I') return; // clicked on edit or delete
-      console.log('Sortable initialized');
-      Sortable.initItemId = $scope.item.id;
-      element.find('.ui-item').addClass('started');
-      $document.on('mousemove', mousemove);
-      $document.on('mouseup', mouseup);
-      $('body').css({cursor: 'move'});
+    var sortable = new Sortable(element, $scope.item, function (startId, targetId) {
+      keepService.switchItems(startId, targetId);
     });
 
-    function mousemove (event) {
-      $('.ui-item.targetted').removeClass('targetted');
-      var itemElement = angular.element(event.target).closest('.ui-item');
-      Sortable.targetItemId = null;
-      if ( itemElement.length > 0 && !itemElement.hasClass('started')) {
-        itemElement.addClass('targetted');
-        var scope = itemElement.scope();
-        Sortable.targetItemId = scope && scope.item ? scope.item.id : null;
-      }
+    var resizable = new Resizable(element, $scope.item, function (widthUnitChange, heightChange) {
+      console.log('widthUnitChange:', widthUnitChange, 'heightChange:', heightChange);
+      keepService.resizeItem($scope.item.id, widthUnitChange, heightChange);
+    });
 
-    }
+    element.on('$destroy', function() {
+      console.log('item destroy');
+      sortable.destroy();
+      resizable.destroy();
+    });
 
-    function mouseup (event) {
-      $document.off('mousemove', mousemove);
-      $document.off('mouseup', mouseup);
-      $('.ui-item.started').removeClass('started');
-      $('.ui-item.targetted').removeClass('targetted');
-      $('body').css({cursor: 'auto'});
-      keepService.switchItems(Sortable.initItemId, Sortable.targetItemId);
-      Sortable.clear();
-    }
   }
 
   function percent (tasks) {
@@ -83,21 +64,102 @@ function uiKeepItem (keepService, $document) {
   }
 }
 
+/*
+ * Sortable
+ */
+var Sortable = function (element, item, callback) {
+  this.element = element;
+  this.item = item;
+  this.targetItemId = null;
+  this.callback = callback;
+  element.find('.panel-heading').on('mousedown', this.initialize.bind(this));
+}
 
-// function uiKeepEdit () {
-//   return {
-//     restrict: 'EA',
-//     require: '?ngModel',
-//     templateUrl: '/keep/views/uiKeepTodo.html',
-//     compile: function compile() {
-//       return postLink;
-//     }
-//   };
-//
-//   function postLink () {
-//
-//   }
-// }
+Sortable.prototype = {
+  initialize: function (event) {
+    event.preventDefault();
+    //console.log(event.target.tagName);
+    if (event.target.tagName === 'I') return; // clicked on edit or delete
+    console.log('Sortable initialized');
+    //this.initItemId = $scope.item.id;
+    this.element.find('.ui-item').addClass('started');
+    $(document).on('mousemove', this.mousemove.bind(this));
+    $(document).on('mouseup', this.mouseup.bind(this));
+    $('body').css({cursor: 'move'});
+  },
+  mousemove: function (event) {
+    $('.ui-item.targetted').removeClass('targetted');
+    var targetItemElement = angular.element(event.target).closest('.ui-item');
+    this.targetItemId = null;
+    if ( targetItemElement.length > 0 && !targetItemElement.hasClass('started')) {
+      targetItemElement.addClass('targetted');
+      var scope = targetItemElement.scope();
+      this.targetItemId = scope && scope.item ? scope.item.id : null;
+    }
+  },
+  mouseup: function (event) {
+    this.callback(this.item.id, this.targetItemId);
+    this.targetItemId = null;
+    $(document).off('mousemove');
+    $(document).off('mouseup');
+    $('.ui-item.started').removeClass('started');
+    $('.ui-item.targetted').removeClass('targetted');
+    $('body').css({cursor: 'auto'});
+  },
+  destroy: function () {
+    this.element.find('.panel-heading').off('mousedown');
+  }
+}
+
+var Resizable = function (element, item, callback) {
+  this.element = element.find('.ui-item');
+  this.item = item;
+  this.handleBase = -5;
+  this.callback = callback;
+  this.initialize();
+}
+
+Resizable.prototype = {
+  initialize: function () {
+    var self = this;
+    this.element.find('.ui-resizable-handle').on('mousedown', function (event) {
+      event.preventDefault();
+      self.startX = event.pageX;
+      self.startY = event.pageY;
+      self.handle = $(event.target);
+      self.direction = self.handle.hasClass('ui-resizable-e') ? 'e' : 's';
+      self.widthUnitLength = parseInt(self.element.width() / self.item.widthUnitNumber);
+      self.widthUnitChange = 0;
+      self.heightChange = 0;
+      self.element.addClass('resizing-' + self.direction);
+      $(document).on('mousemove', self.mousemove.bind(self));
+      $(document).on('mouseup', self.mouseup.bind(self));
+    });
+  },
+  mousemove: function (event) {
+    if (this.direction === 'e') {
+      var moved = event.pageX - this.startX;
+      this.widthUnitChange = parseInt(moved / this.widthUnitLength);
+      this.handle.css('right', this.handleBase - this.widthUnitChange * this.widthUnitLength);
+    }
+    else {
+      var moved = event.pageY - this.startY;
+      this.handle.css('bottom', this.handleBase - moved);
+      this.heightChange = moved;
+    }
+  },
+  mouseup: function () {
+    this.element.removeClass('resizing-' + this.direction);
+    this.handle.css('right', this.handleBase);
+    this.handle.css('bottom', this.handleBase);
+    $(document).off('mousemove');
+    $(document).off('mouseup');
+    this.callback(this.widthUnitChange, this.heightChange);
+  },
+  destroy: function () {
+    this.element.find('.ui-resizable-handle').off('mousedown');
+  }
+}
 
 function uiBindMarkdown($timeout){
   return {

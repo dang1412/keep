@@ -38,6 +38,7 @@ function uiKeepItem (keepService, $document) {
     var resizable = new Resizable(element, $scope.item, function (widthUnitChange, heightChange) {
       console.log('widthUnitChange:', widthUnitChange, 'heightChange:', heightChange);
       keepService.resizeItem($scope.item.id, widthUnitChange, heightChange);
+      resizable.setWidthUnitNumber($scope.item.widthUnitNumber);
     });
 
     element.on('$destroy', function() {
@@ -120,6 +121,9 @@ var Resizable = function (element, item, callback) {
 }
 
 Resizable.prototype = {
+  setWidthUnitNumber: function (widthUnitNumber) {
+    this.item.widthUnitNumber = widthUnitNumber;
+  },
   initialize: function () {
     var self = this;
     this.element.find('.ui-resizable-handle').on('mousedown', function (event) {

@@ -6,6 +6,7 @@ Checkout [Demo](http://dttung-mario.github.io/keep/#/) here.
  - Create, edit, delete text note or todo task.
  - Undo / Redo to avoid mistaken actions.
  - Resize, change items order.
+ - Auto save using `localStorage`.
 
 ## Usage
 It is pure client Javascript web app so in order to run just download the code, modify source files paths (you should also look into some `ng-include` paths too), and access the `index.html` via any simple http-server.

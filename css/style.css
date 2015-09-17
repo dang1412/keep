@@ -1,8 +1,52 @@
 .container {
   padding-top: 20px;
 }
-.ui-item .panel-title a {
+.ui-item {
+  position: relative;
+}
+.ui-item.started {
+  border: 1px dashed #337ab7;
+}
+.ui-item.targetted {
+  border: 1px dashed #333;
+}
+.ui-item .panel-heading {
+  cursor: move;
+}
+.ui-item .panel-heading .panel-title a {
+  display: none;
   margin-left: 5px;
+}
+.ui-item .panel-heading:hover .panel-title a {
+  display: inline-block;
+}
+.ui-item .ui-resizable-handle {
+  position: absolute;
+  font-size: 0.1px;
+  display: block;
+  -ms-touch-action: none;
+  touch-action: none;
+  z-index: 90;
+}
+.ui-item .ui-resizable-e {
+  cursor: e-resize;
+  width: 7px;
+  right: -5px;
+  top: 0;
+  height: 100%;
+}
+.ui-item.resizing-e .ui-resizable-e {
+  border-right: 1px dashed;
+}
+.ui-item .ui-resizable-s {
+  cursor: s-resize;
+  height: 7px;
+  width: 100%;
+  bottom: -5px;
+  left: 0;
+}
+.ui-item.resizing-s .ui-resizable-s {
+  border-bottom: 1px dashed;
 }
 .ui-todo-item .tasks label .todo-item-label {
   margin-left: .5em;

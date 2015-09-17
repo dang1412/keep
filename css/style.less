@@ -3,10 +3,54 @@
 }
 
 .ui-item {
-  .panel-title {
-    a {
-      margin-left: 5px;
+  position: relative;
+  &.started {
+    border: 1px dashed #337ab7;
+  }
+  &.targetted {
+    border: 1px dashed #333;
+  }
+  .panel-heading {
+    cursor: move;
+    .panel-title {
+      a {
+        display: none;
+        margin-left: 5px;
+      }
     }
+    &:hover .panel-title a {
+      display: inline-block;
+    }
+  }
+  .ui-resizable-handle {
+    position: absolute;
+    font-size: 0.1px;
+    display: block;
+    -ms-touch-action: none;
+    touch-action: none;
+    z-index: 90;
+  }
+
+  .ui-resizable-e {
+    cursor: e-resize;
+    width: 7px;
+    right: -5px;
+    top: 0;
+    height: 100%;
+  }
+  &.resizing-e .ui-resizable-e {
+    border-right: 1px dashed;
+  }
+
+  .ui-resizable-s {
+    cursor: s-resize;
+    height: 7px;
+    width: 100%;
+    bottom: -5px;
+    left: 0;
+  }
+  &.resizing-s .ui-resizable-s {
+    border-bottom: 1px dashed;
   }
 }
 
